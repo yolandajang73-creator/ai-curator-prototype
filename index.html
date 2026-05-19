@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>主理人 Agent · 交互原型 v3</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #ececec;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+  .stage { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .phone {
+    width: 390px; height: 844px;
+    background: #fff; border-radius: 44px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    overflow: hidden; position: relative;
+    border: 8px solid #1a1a1a;
+  }
+  .phone-label { text-align: center; font-size: 12px; color: #666; margin-top: 12px; letter-spacing: 1px; }
+  .phone-inner { width: 100%; height: 100%; position: relative; }
+  .screen { width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; position: absolute; top:0; left:0; background: #fafafa; opacity:0; pointer-events:none; transition: opacity 0.25s; }
+  .screen.active { opacity:1; pointer-events:auto; z-index: 5; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  .status-bar { height: 44px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; }
+  .status-bar .right { display: flex; gap: 6px; }
+
+  .head { padding: 4px 20px 12px; }
+  .head .title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .head .sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+  .back-bar { padding: 4px 20px 8px; display: flex; align-items: center; gap: 12px; }
+  .back-btn { width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+
+  .search { margin: 8px 20px 0; background: #fff; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee; }
+  .search input { flex: 1; border: none; outline: none; font-size: 14px; background: transparent; }
+  .search .icon { font-size: 16px; color: #999; }
+
+  .profile-row { margin: 12px 0 0; padding: 0 20px; display: flex; gap: 8px; overflow-x: auto; }
+  .profile-row::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; background: #fff; border: 1px solid #e5e5e5; border-radius: 100px; padding: 8px 14px; font-size: 12px; color: #555; display: flex; align-items: center; gap: 6px; }
+  .chip.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+
+  .hint-section { padding: 20px 20px 12px; }
+  .hint-title { font-size: 13px; color: #888; margin-bottom: 10px; display:flex; justify-content: space-between; }
+  .hint-grid { display: flex; flex-direction: column; gap: 8px; }
+  .hint-item { background: #fff; border-radius: 14px; padding: 14px 16px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f0f0f0; cursor: pointer; transition: all 0.15s; }
+  .hint-item:hover, .hint-item:active { border-color: #1a1a1a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .hint-item .level { font-size: 11px; color: #999; }
+  .hint-item .arrow { color: #ccc; font-size: 16px; margin-left: 8px; }
+
+  /* card stack */
+  .stack-screen { padding-bottom: 110px; }
+  .stack-head { padding: 0 20px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .stack-head .q { font-size: 15px; font-weight: 600; }
+  .stack-head .progress { font-size: 12px; color: #888; }
+
+  .card-stack { margin: 0 20px; position: relative; height: 600px; }
+  .agent-card { position: absolute; width: 100%; height: 100%; background: #fff; border-radius: 22px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.10); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s; display: flex; flex-direction: column; }
+  .card-cover { height: 240px; position: relative; display: flex; align-items: flex-end; padding: 14px; overflow: hidden; }
+  .card-cover img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .card-cover::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.25) 100%); }
+
+  .agent-badge { background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; position: relative; z-index: 2; }
+  .agent-avatar { width: 42px; height: 42px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; overflow: hidden; }
+  .agent-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .agent-info .name { font-size: 14px; font-weight: 700; }
+  .agent-info .meta { font-size: 11px; color: #666; margin-top: 2px; display: flex; gap: 6px; align-items: center; }
+  .agent-info .meta .score { color: #16a34a; font-weight: 600; }
+  .rank-tag { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.7); color: #fff; border-radius: 100px; padding: 5px 11px; font-size: 11px; font-weight: 600; backdrop-filter: blur(6px); z-index: 2; }
+  .rank-tag.match { background: #16a34a; }
+  .rank-tag.complement { background: #f59e0b; }
+  .rank-tag.budget { background: #6366f1; }
+
+  .card-body { padding: 14px 16px; flex: 1; overflow-y: auto; }
+  .card-body::-webkit-scrollbar { display: none; }
+
+  .why-you { background: #fff7ed; border-left: 3px solid #f59e0b; padding: 10px 12px; border-radius: 8px; font-size: 12px; color: #7c2d12; line-height: 1.6; margin-bottom: 12px; }
+  .why-you .label { font-weight: 700; margin-right: 4px; }
+
+  .agent-msg { font-size: 13px; line-height: 1.7; color: #333; margin-bottom: 12px; }
+  .agent-msg p { margin-bottom: 6px; }
+
+  .product-row { display: flex; gap: 10px; overflow-x: auto; margin: 0 -16px 12px; padding: 0 16px 4px; }
+  .product-row::-webkit-scrollbar { display: none; }
+  .product-card { flex-shrink: 0; width: 130px; border-radius: 12px; overflow: hidden; border: 1px solid #f0f0f0; background: #fff; }
+  .product-img { height: 160px; position: relative; overflow: hidden; background: #f5f5f5; }
+  .product-img img { width: 100%; height: 100%; object-fit: cover; }
+  .product-info { padding: 8px 10px; }
+  .product-info .pname { font-size: 11px; line-height: 1.4; color: #333; height: 30px; overflow: hidden; }
+  .product-info .pprice { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-top: 4px; }
+  .product-info .pprice .old { font-size: 10px; color: #999; text-decoration: line-through; margin-left: 4px; font-weight: 400; }
+
+  .combine-hint { background: #f5f5f5; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #555; display: flex; align-items: center; gap: 8px; }
+  .combine-hint .ic { font-size: 14px; }
+
+  .action-bar { position: absolute; bottom: 24px; left: 0; right: 0; display: flex; justify-content: center; gap: 16px; padding: 0 20px; z-index: 10; }
+  .act-btn { width: 56px; height: 56px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+  .act-btn:active { transform: scale(0.92); }
+  .act-btn.dismiss { color: #999; }
+  .act-btn.cart { color: #ff6010; }
+  .act-btn.like { background: #1a1a1a; color: #fff; width: 64px; height: 64px; font-size: 26px; }
+  .act-btn.combine { color: #6366f1; }
+
+  /* 商品卡 加购/立即购 按钮 (淘宝直播风格) */
+  .product-card { position: relative; }
+  .product-img { position: relative; }
+  .product-info { position: relative; padding-right: 46px; }
+  .product-info .pprice { font-size: 12px; }
+  .product-info .pprice .old { font-size: 9px; }
+  .product-actions {
+    position: absolute; bottom: 7px; right: 6px;
+    display: flex; gap: 3px; z-index: 2;
+  }
+  .pa-btn {
+    height: 18px; min-width: 18px;
+    padding: 0 4px; border-radius: 9px;
+    font-size: 9px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; font-weight: 700;
+    transition: transform 0.1s;
+  }
+  .pa-btn.cart {
+    background: #fff5ec;
+    color: #ff6010;
+    border: 1px solid #ffcfa3;
+  }
+  .pa-btn.buy {
+    background: #ff2741;
+    color: #fff;
+  }
+  .pa-btn:active { transform: scale(0.94); }
+
+  /* 1V1 chat */
+  .chat-screen { padding: 0 0 20px; }
+  .chat-head { padding: 8px 20px 14px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #eee; }
+  .chat-head .avatar { width: 44px; height: 44px; border-radius: 50%; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; overflow: hidden; }
+  .chat-head .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .chat-head .name { font-size: 15px; font-weight: 700; }
+  .chat-head .status { font-size: 11px; color: #16a34a; margin-top: 2px; }
+  .chat-msg { padding: 14px 20px; }
+  .bubble { max-width: 88%; padding: 12px 14px; border-radius: 16px; font-size: 13px; line-height: 1.6; margin-bottom: 10px; }
+  .bubble.agent { background: #fff; border: 1px solid #f0f0f0; border-top-left-radius: 4px; }
+  .bubble.user { background: #1a1a1a; color: #fff; margin-left: auto; border-top-right-radius: 4px; }
+
+  /* horizontal product row in chat */
+  .chat-products { margin: 8px -20px 12px; padding: 4px 20px; }
+  .chat-products-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .chat-products-row::-webkit-scrollbar { display: none; }
+  .chat-products-row .product-card { width: 140px; }
+  .chat-products-row .product-img { height: 170px; }
+  .chat-products-row .product-card.pick { border-color: #ec4899; box-shadow: 0 4px 14px rgba(236,72,153,0.15); }
+  .chat-products-row .product-card.pick .pick-tag {
+    position: absolute; top: 8px; left: 8px; z-index: 2;
+    background: #ec4899; color: #fff; padding: 3px 8px;
+    font-size: 10px; font-weight: 700; border-radius: 6px;
+  }
+
+  /* diagnostic */
+  .diag-screen { padding: 0 0 30px; }
+  .closet-stat { margin: 0 20px 16px; padding: 16px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 16px; }
+  .closet-stat h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .closet-stat .desc { font-size: 12px; color: #78350f; line-height: 1.6; }
+  .stat-row { display: flex; gap: 10px; margin-top: 12px; }
+  .stat-cell { flex: 1; background: rgba(255,255,255,0.6); border-radius: 10px; padding: 10px; text-align: center; }
+  .stat-cell .num { font-size: 18px; font-weight: 700; color: #92400e; }
+  .stat-cell .lbl { font-size: 10px; color: #78350f; margin-top: 2px; }
+
+  .gap-section-head { padding: 0 20px 10px; display: flex; justify-content: space-between; align-items: baseline; }
+  .gap-section-head .title { font-size: 13px; color: #888; }
+  .gap-section-head .swipe-hint { font-size: 11px; color: #ccc; }
+  .gap-carousel { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px 12px; scroll-snap-type: x mandatory; }
+  .gap-carousel::-webkit-scrollbar { display: none; }
+  .gap-card { flex-shrink: 0; width: 310px; padding: 14px; background: #fff; border-radius: 14px; border: 1px solid #f0f0f0; scroll-snap-align: start; display: flex; flex-direction: column; }
+  .gap-card .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .gap-card .gap-name { font-size: 14px; font-weight: 700; }
+  .gap-card .gap-tag { font-size: 10px; padding: 3px 8px; border-radius: 100px; background: #fef2f2; color: #dc2626; }
+  .gap-card .gap-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 10px; min-height: 36px; }
+
+  /* combine */
+  .combine-screen { padding: 0 0 40px; }
+  .combine-head { padding: 8px 20px 16px; }
+  .combine-head h3 { font-size: 18px; font-weight: 700; }
+  .combine-head p { font-size: 12px; color: #888; margin-top: 4px; }
+  .look-card { margin: 0 20px 16px; background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid #f0f0f0; }
+  .look-preview { height: 360px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 4px; padding: 4px; background: #f5f5f5; position: relative; overflow: hidden; }
+  .look-preview .main-slot, .look-preview .right-col { overflow: hidden; position: relative; background: #fff; }
+  .look-preview .right-col { display: grid; grid-template-rows: 1fr 1fr; gap: 4px; background: #f5f5f5; }
+  .look-preview .right-col > .slot { overflow: hidden; position: relative; background: #fff; }
+  .look-preview .main-slot img, .look-preview .slot img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .look-preview .tag { position: absolute; bottom: 8px; left: 8px; background: rgba(255,255,255,0.95); backdrop-filter: blur(6px); font-size: 10px; padding: 4px 8px; border-radius: 100px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .look-preview .label { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.78); color: #fff; backdrop-filter: blur(6px); border-radius: 100px; padding: 5px 12px; font-size: 11px; font-weight: 600; z-index: 3; }
+  .look-items { padding: 14px 16px; }
+  .look-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+  .look-row:last-child { border-bottom: none; }
+  .look-row .part { color: #888; font-size: 11px; margin-bottom: 2px; }
+  .look-row .name { color: #333; }
+  .look-row .agent-tag { font-size: 11px; color: #6366f1; margin-top: 2px; }
+  .look-row .price { font-weight: 700; color: #1a1a1a; }
+  .look-total { background: #fafafa; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .look-total .total-label { font-size: 12px; color: #666; }
+  .look-total .total-price { font-size: 20px; font-weight: 700; color: #dc2626; }
+  .look-actions { display: flex; gap: 10px; padding: 0 16px 16px; }
+  .look-actions button { flex: 1; padding: 12px; border-radius: 12px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .look-actions .secondary { background: #f5f5f5; color: #333; }
+  .look-actions .primary { background: #1a1a1a; color: #fff; }
+
+  /* annotations */
+  .annotations { width: 320px; font-size: 13px; color: #333; line-height: 1.7; }
+  .annotations h2 { font-size: 16px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #1a1a1a; }
+  .annotations h3 { font-size: 13px; margin: 16px 0 6px; color: #6366f1; }
+  .annotations p { margin-bottom: 8px; color: #555; font-size: 12px; }
+  .annotations ul { padding-left: 18px; margin-bottom: 8px; }
+  .annotations li { margin-bottom: 4px; color: #555; font-size: 12px; }
+
+  .screen-tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; max-width: 410px; }
+  .screen-tab { padding: 6px 12px; background: #fff; border: 1px solid #ddd; border-radius: 100px; font-size: 11px; cursor: pointer; color: #555; }
+  .screen-tab.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+  /* AI 标识 */
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 9px; font-weight: 700; line-height: 1;
+    padding: 2px 6px 2px 5px; border-radius: 100px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff; margin-left: 5px; letter-spacing: 0.5px;
+    vertical-align: middle;
+  }
+  .ai-badge::before { content: '✦'; font-size: 8px; }
+  .ai-badge.sm { font-size: 8px; padding: 1px 5px; }
+  .ai-badge.lg { font-size: 10px; padding: 3px 8px; }
+
+  .ai-corner {
+    position: absolute; bottom: -3px; right: -3px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff; font-size: 8px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #fff;
+    z-index: 3;
+  }
+  .agent-avatar { position: relative; overflow: visible; }
+  .agent-avatar > img { border-radius: 50%; }
+
+  .hero-mark {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1));
+    color: #6366f1; padding: 4px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 600;
+    border: 1px solid rgba(99,102,241,0.2);
+    margin-bottom: 6px;
+  }
+  .hero-mark::before { content: '✦'; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div>
+    <div class="screen-tabs">
+      <div class="screen-tab active" data-screen="s1">① 提问入口</div>
+      <div class="screen-tab" data-screen="s3a">③ 场景型·520</div>
+      <div class="screen-tab" data-screen="s3b">③ 风格型·甜辣</div>
+      <div class="screen-tab" data-screen="s3c">③ 1V1·赵大喜</div>
+      <div class="screen-tab" data-screen="s3d">③ 诊断·衣橱</div>
+      <div class="screen-tab" data-screen="s4">④ 跨家组合</div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-inner">
+
+      <!-- ============ S1: Entry ============ -->
+      <div class="screen active" id="s1">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="head">
+          <div class="title">问主理人</div>
+          <div class="sub">把决策交给最懂风格的人</div>
+        </div>
+        <div class="search">
+          <span class="icon">🔍</span>
+          <input placeholder="想穿成什么样？跟主理人聊聊" />
+          <span class="icon">🎤</span>
+        </div>
+        <div class="profile-row">
+          <div class="chip primary"><span class="dot"></span>我的档案</div>
+          <div class="chip">165cm · 48kg</div>
+          <div class="chip">冷白皮</div>
+          <div class="chip">甜酷·法式</div>
+          <div class="chip">¥300-800</div>
+          <div class="chip">+ 编辑</div>
+        </div>
+
+        <div class="hint-section">
+          <div class="hint-title">
+            <span>最近大家在问</span>
+            <span style="color:#ccc;">点击试试 →</span>
+          </div>
+          <div class="hint-grid">
+            <div class="hint-item" onclick="goScreen('s3a')">
+              <span>520 约会穿什么</span>
+              <span style="display:flex;align-items:center;">
+                <span class="level">场景型 · 32 位 AI 主理人在线</span>
+                <span class="arrow">›</span>
+              </span>
+            </div>
+            <div class="hint-item" onclick="goScreen('s3b')">
+              <span>给我推荐甜酷风衣服</span>
+              <span style="display:flex;align-items:center;">
+                <span class="level">风格型 · 12 位匹配</span>
+                <span class="arrow">›</span>
+              </span>
+            </div>
+            <div class="hint-item" onclick="goScreen('s3c')">
+              <span>赵大喜最近上新了，哪些适合我</span>
+              <span style="display:flex;align-items:center;">
+                <span class="level">定向型 · 进入1V1</span>
+                <span class="arrow">›</span>
+              </span>
+            </div>
+            <div class="hint-item" onclick="goScreen('s3d')">
+              <span>我衣橱里少一件什么</span>
+              <span style="display:flex;align-items:center;">
+                <span class="level">诊断型 · 基于历史订单</span>
+                <span class="arrow">›</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint-section" style="padding-top: 0;">
+          <div class="hint-title">你常聊的 AI 主理人</div>
+          <div style="display: flex; gap: 12px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: none;">
+            <div onclick="goScreen('s3c')" style="text-align: center; flex-shrink: 0; cursor:pointer;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; margin-bottom: 4px; position: relative;"><div style="width:100%;height:100%;border-radius:50%;overflow:hidden;"><img src="images/sweet-4.jpg" style="width:100%;height:100%;object-fit:cover;"/></div><div class="ai-corner">AI</div></div>
+              <div style="font-size: 10px;">赵大喜</div>
+            </div>
+            <div style="text-align: center; flex-shrink: 0;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; margin-bottom: 4px; position: relative;"><div style="width:100%;height:100%;border-radius:50%;overflow:hidden;"><img src="images/unvesno-3.jpg" style="width:100%;height:100%;object-fit:cover;"/></div><div class="ai-corner">AI</div></div>
+              <div style="font-size: 10px;">UNVESNO</div>
+            </div>
+            <div style="text-align: center; flex-shrink: 0;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; margin-bottom: 4px; position: relative;"><div style="width:100%;height:100%;border-radius:50%;overflow:hidden;"><img src="images/unvesno-1.jpg" style="width:100%;height:100%;object-fit:cover;"/></div><div class="ai-corner">AI</div></div>
+              <div style="font-size: 10px;">三克拉</div>
+            </div>
+            <div style="text-align: center; flex-shrink: 0;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; margin-bottom: 4px; position: relative;"><div style="width:100%;height:100%;border-radius:50%;overflow:hidden;"><img src="images/dax-2.jpg" style="width:100%;height:100%;object-fit:cover;"/></div><div class="ai-corner">AI</div></div>
+              <div style="font-size: 10px;">叙白</div>
+            </div>
+            <div style="text-align: center; flex-shrink: 0;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; margin-bottom: 4px; position: relative;"><div style="width:100%;height:100%;border-radius:50%;overflow:hidden;"><img src="images/dax-3.jpg" style="width:100%;height:100%;object-fit:cover;"/></div><div class="ai-corner">AI</div></div>
+              <div style="font-size: 10px;">法式碎花</div>
+            </div>
+            <div style="text-align: center; flex-shrink: 0;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: #f5f5f5; margin-bottom: 4px; display:flex;align-items:center;justify-content:center;font-weight:700;color:#999;">+</div>
+              <div style="font-size: 10px;">发现</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ S3a: 场景型 - 520 ============ -->
+      <div class="screen stack-screen" id="s3a">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="back-bar"><div class="back-btn" onclick="goScreen('s1')">‹</div><div style="font-size:13px;color:#888;">返回</div></div>
+        <div class="stack-head"><div class="q">"520 约会穿什么"</div><div class="progress" id="progressA">1 / 10</div></div>
+        <div class="card-stack" id="stackA"></div>
+        <div class="action-bar">
+          <button class="act-btn dismiss" onclick="swipe('A',-1)">✕</button>
+          <button class="act-btn cart" onclick="swipe('A',0)">🛒</button>
+          <button class="act-btn like" onclick="swipe('A',1)">♡</button>
+          <button class="act-btn combine" onclick="goScreen('s4')">⊞</button>
+        </div>
+      </div>
+
+      <!-- ============ S3b: 风格型 - 甜辣 ============ -->
+      <div class="screen stack-screen" id="s3b">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="back-bar"><div class="back-btn" onclick="goScreen('s1')">‹</div><div style="font-size:13px;color:#888;">返回</div></div>
+        <div class="stack-head"><div class="q">"给我推荐甜酷风衣服"</div><div class="progress" id="progressB">1 / 12</div></div>
+        <div class="card-stack" id="stackB"></div>
+        <div class="action-bar">
+          <button class="act-btn dismiss" onclick="swipe('B',-1)">✕</button>
+          <button class="act-btn cart" onclick="swipe('B',0)">🛒</button>
+          <button class="act-btn like" onclick="swipe('B',1)">♡</button>
+          <button class="act-btn combine" onclick="goScreen('s4')">⊞</button>
+        </div>
+      </div>
+
+      <!-- ============ S3c: 1V1 - 赵大喜 (商品横滑) ============ -->
+      <div class="screen chat-screen" id="s3c">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="back-bar"><div class="back-btn" onclick="goScreen('s1')">‹</div><div style="font-size:13px;color:#888;">返回</div></div>
+        <div class="chat-head">
+          <div class="avatar" style="overflow:visible;position:relative;">
+            <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;"><img src="images/sweet-4.jpg"/></div>
+            <div class="ai-corner">AI</div>
+          </div>
+          <div>
+            <div class="name">赵大喜<span class="ai-badge">AI 主理人</span></div>
+            <div class="status">● 在线 · 准确率 94% · 已和你聊过 8 次</div>
+          </div>
+        </div>
+        <div class="chat-msg">
+          <div class="bubble user">赵大喜最近上新了，哪些适合我？</div>
+          <div class="bubble agent">
+            嘿小杨～看到你了。📌 我对你的印象：165/48 冷白皮、衣橱里 60% 红色系、最近老在看小香风。
+            <br/><br/>
+            这次上新 23 件，我帮你过了一遍，4 件你能直接闭眼入：
+          </div>
+
+          <!-- 横向滚动商品 -->
+          <div class="chat-products">
+            <div class="chat-products-row">
+              <div class="product-card pick" style="position:relative;">
+                <span class="pick-tag">主推</span>
+                <div class="product-img"><img src="images/sweet-4.jpg"/></div>
+                <div class="product-info">
+                  <div class="pname">大喜苹果 · 红色刺绣Tee</div>
+                  <div class="pprice">¥268 <span class="old">¥328</span></div>
+                <div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div>
+                </div>
+              </div>
+              <div class="product-card">
+                <div class="product-img"><img src="images/sweet-3.jpg"/></div>
+                <div class="product-info">
+                  <div class="pname">海军蓝星星贴布Tee</div>
+                  <div class="pprice">¥288</div>
+                <div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div>
+                </div>
+              </div>
+              <div class="product-card">
+                <div class="product-img"><img src="images/sweet-1.jpg"/></div>
+                <div class="product-info">
+                  <div class="pname">卡通女孩印花Raglan</div>
+                  <div class="pprice">¥218</div>
+                <div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div>
+                </div>
+              </div>
+              <div class="product-card">
+                <div class="product-img"><img src="images/sweet-2.jpg"/></div>
+                <div class="product-info">
+                  <div class="pname">UPF50+ 防晒卡通couple Tee</div>
+                  <div class="pprice">¥198</div>
+                <div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bubble agent">
+            其中那件红色苹果Tee我建议你拿——你上个月在我直播间问过类似款没等到尺码，这次补到 S 了。
+            <br/><br/>
+            如果你想我按"约会场景"再帮你配一套，告诉我场地和对方风格，我立刻给你出 look。
+          </div>
+          <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+            <div class="chip" style="background:#fff7ed;color:#9a3412;border-color:#fed7aa;cursor:pointer;">户外野餐</div>
+            <div class="chip" style="background:#fff7ed;color:#9a3412;border-color:#fed7aa;cursor:pointer;">米其林晚餐</div>
+            <div class="chip" style="background:#fff7ed;color:#9a3412;border-color:#fed7aa;cursor:pointer;">看展逛街</div>
+            <div class="chip" style="background:#1a1a1a;color:#fff;border-color:#1a1a1a;cursor:pointer;">让她猜 →</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ S3d: 诊断 ============ -->
+      <div class="screen diag-screen" id="s3d">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="back-bar"><div class="back-btn" onclick="goScreen('s1')">‹</div><div style="font-size:13px;color:#888;">返回</div></div>
+        <div class="stack-head"><div class="q">"我衣橱里少一件什么"</div></div>
+
+        <div class="closet-stat">
+          <h3>你的衣橱诊断 🔍</h3>
+          <div class="desc">基于近 12 个月购买的 83 件单品 · 由 6 位 AI 主理人 agent 联合分析</div>
+          <div class="stat-row">
+            <div class="stat-cell"><div class="num">83</div><div class="lbl">件单品</div></div>
+            <div class="stat-cell"><div class="num">62%</div><div class="lbl">甜辣偏好</div></div>
+            <div class="stat-cell"><div class="num">3</div><div class="lbl">缺口</div></div>
+          </div>
+        </div>
+
+        <div class="gap-section-head">
+          <div class="title">AI 主理人发现的缺口</div>
+          <div class="swipe-hint">横滑查看 →</div>
+        </div>
+
+        <div class="gap-carousel">
+          <div class="gap-card">
+            <div class="title-row">
+              <div class="gap-name">缺口 1 · 通勤场景</div>
+              <div class="gap-tag">高优先级</div>
+            </div>
+            <div class="gap-desc">休闲风占 78%，但你在金融机构上班。@UNVESNO·AI 建议补 2 件极简通勤。</div>
+            <div class="product-row">
+              <div class="product-card">
+                <div class="product-img"><img src="images/unvesno-3.jpg"/></div>
+                <div class="product-info"><div class="pname">UNVESNO · 海军蓝束腰衬衫</div><div class="pprice">¥598</div><div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div></div>
+              </div>
+              <div class="product-card">
+                <div class="product-img"><img src="images/unvesno-1.jpg"/></div>
+                <div class="product-info"><div class="pname">UNVESNO · Polo针织 + 灰百褶</div><div class="pprice">¥459</div><div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gap-card">
+            <div class="title-row">
+              <div class="gap-name">缺口 2 · 夏季外搭</div>
+              <div class="gap-tag" style="background:#fef3c7;color:#92400e;">中优先级</div>
+            </div>
+            <div class="gap-desc">空调房凉，你只有1件外搭。@叙白·AI 推荐两件轻薄罩衫，能驾驭你 80% 的现有内搭。</div>
+            <div class="product-row">
+              <div class="product-card">
+                <div class="product-img"><img src="images/dax-2.jpg"/></div>
+                <div class="product-info"><div class="pname">叙白 · 黄色叶纹雪纺罩衫</div><div class="pprice">¥329</div><div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div></div>
+              </div>
+              <div class="product-card">
+                <div class="product-img"><img src="images/dax-1.jpg"/></div>
+                <div class="product-info"><div class="pname">叙白 · 樱花蕾丝立领衫</div><div class="pprice">¥289</div><div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gap-card">
+            <div class="title-row">
+              <div class="gap-name">缺口 3 · 撑场连衣裙</div>
+              <div class="gap-tag" style="background:#dcfce7;color:#166534;">建议补充</div>
+            </div>
+            <div class="gap-desc">婚礼/年会用得到。@法式碎花·AI 推荐一件真丝连衣裙作为压箱底单品。</div>
+            <div class="product-row">
+              <div class="product-card">
+                <div class="product-img"><img src="images/dax-3.jpg"/></div>
+                <div class="product-info"><div class="pname">法式碎花 · 100% 真丝水彩连衣裙</div><div class="pprice">¥1280</div><div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div></div>
+              </div>
+              <div class="product-card">
+                <div class="product-img"><img src="images/dax-4.jpg"/></div>
+                <div class="product-info"><div class="pname">法式碎花 · 油画印花吊带长裙</div><div class="pprice">¥1080</div><div class="product-actions"><div class="pa-btn cart">🛒</div><div class="pa-btn buy">购</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ S4: Combine ============ -->
+      <div class="screen combine-screen" id="s4">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="back-bar"><div class="back-btn" onclick="goScreen('s3a')">‹</div><div style="font-size:13px;color:#888;">返回</div></div>
+        <div class="combine-head">
+          <h3>跨主理人组合</h3>
+          <p>3 位 AI 主理人为你拼了一套完整 look</p>
+        </div>
+        <div class="look-card">
+          <div class="look-preview">
+            <span class="label">3 位 AI 主理人协同</span>
+            <div class="main-slot">
+              <img src="images/dax-3.jpg"/>
+              <div class="tag">@法式碎花·主体</div>
+            </div>
+            <div class="right-col">
+              <div class="slot"><img src="images/sweet-1.jpg"/><div class="tag">@赵大喜·外搭</div></div>
+              <div class="slot"><img src="images/unvesno-4.jpg"/><div class="tag">@UNVESNO·配饰</div></div>
+            </div>
+          </div>
+          <div class="look-items">
+            <div class="look-row">
+              <div>
+                <div class="part">外套</div>
+                <div class="name">卡通印花Raglan短Tee</div>
+                <div class="agent-tag">@ 赵大喜 · 匹配度 96%</div>
+              </div>
+              <div class="price">¥218</div>
+            </div>
+            <div class="look-row">
+              <div>
+                <div class="part">连衣裙</div>
+                <div class="name">100% 真丝水彩印花连衣裙</div>
+                <div class="agent-tag">@ 法式碎花 · 互补搭配</div>
+              </div>
+              <div class="price">¥1280</div>
+            </div>
+            <div class="look-row">
+              <div>
+                <div class="part">配饰</div>
+                <div class="name">米白蕾丝吊带 + 草编托特包</div>
+                <div class="agent-tag">@ UNVESNO · 完整 look</div>
+              </div>
+              <div class="price">¥586</div>
+            </div>
+          </div>
+          <div class="look-total">
+            <span class="total-label">整套 · 跨家立减 ¥80</span>
+            <span class="total-price">¥2004</span>
+          </div>
+          <div class="look-actions">
+            <button class="secondary">单买</button>
+            <button class="primary">整套加购</button>
+          </div>
+        </div>
+
+        <div style="padding: 0 20px;">
+          <div style="font-size:13px;color:#888;margin-bottom:10px;">你也可以试试</div>
+          <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;">
+            <div style="flex-shrink:0;width:140px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #f0f0f0;">
+              <div style="height:140px;overflow:hidden;"><img src="images/unvesno-2.jpg" style="width:100%;height:100%;object-fit:cover;"/></div>
+              <div style="padding:8px;font-size:11px;">禁欲风版本<br/><span style="color:#888;">¥1180</span></div>
+            </div>
+            <div style="flex-shrink:0;width:140px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #f0f0f0;">
+              <div style="height:140px;overflow:hidden;"><img src="images/dax-1.jpg" style="width:100%;height:100%;object-fit:cover;"/></div>
+              <div style="padding:8px;font-size:11px;">新中式版本<br/><span style="color:#888;">¥1450</span></div>
+            </div>
+            <div style="flex-shrink:0;width:140px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #f0f0f0;">
+              <div style="height:140px;overflow:hidden;"><img src="images/sweet-3.jpg" style="width:100%;height:100%;object-fit:cover;"/></div>
+              <div style="padding:8px;font-size:11px;">学院风版本<br/><span style="color:#888;">¥980</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+    <div class="phone-label">主理人 Agent · 服饰垂类 v3.1</div>
+  </div>
+
+  <div class="annotations">
+    <h2>v3.1 说明</h2>
+    <p>回退到 v3 干净风格，保留你点名的优化：1V1 商品改横向滚动 + 主推卡片高亮。</p>
+
+    <h3>1V1 商品横滑（已实施）</h3>
+    <ul>
+      <li>4 件商品从 2×2 网格 → 横向滚动</li>
+      <li>第一件加"主推"粉色徽标 + 边框高亮</li>
+      <li>商品卡放大（170px 高），单件信息更清晰</li>
+      <li>提示用户横滑探索更多</li>
+    </ul>
+
+    <h3>未做的（v4 尝试中放弃）</h3>
+    <ul>
+      <li>米色纸感底 + 衬线大字 — 太杂志风，阅读成本高</li>
+      <li>编号 01/02/03 替代 chip — 视觉跳跃太多</li>
+      <li>横向 hint carousel — 牺牲了一目了然的列表清晰度</li>
+    </ul>
+    <p>结论：垂直列表 + 圆角卡片 + 中性灰白底 仍然是手机端阅读效率最高的范式。差异化要靠商品视觉本身（主理人摄影），而不是颠覆 UI 基础。</p>
+  </div>
+</div>
+
+<script>
+  const stackA = [
+    { name: '赵大喜', score: 96, rank: '最匹配', rankClass: 'match', tags: '甜酷·Y2K · 准确率 94%',
+      cover: 'images/sweet-4.jpg', avatarImg: 'images/sweet-4.jpg',
+      why: '你档案里"甜酷"权重 87%，最近收藏过 3 件刺绣Tee，本期上新有 2 件直接命中。',
+      msg: '<p>约会不要太"用力"，让对方记住的是你的状态而不是衣服。</p><p>红苹果刺绣Tee 配做旧牛仔，star贴布做点睛——一种"努力但不刻意"的甜辣。</p>',
+      products: [
+        { name: '红苹果刺绣短Tee', price: 268, old: 328, img: 'images/sweet-4.jpg' },
+        { name: '海军蓝星星贴布Tee', price: 288, img: 'images/sweet-3.jpg' },
+        { name: '卡通女孩印花Raglan', price: 218, img: 'images/sweet-1.jpg' }
+      ]},
+    { name: 'UNVESNO', score: 89, rank: '风格挑战', rankClass: 'complement', tags: '法式·极简 · 准确率 91%',
+      cover: 'images/unvesno-3.jpg', avatarImg: 'images/unvesno-3.jpg',
+      why: '反向推荐——你常穿"甜",但 520 换个气质会让对方眼前一亮。你的骨架适合直线条剪裁。',
+      msg: '<p>反向操作。如果他每次都看到你穿粉色，这次试试海军蓝束腰衬衫+灰百褶。</p><p>安静的浪漫比刻意的可爱更有杀伤力。配饰只用一颗珍珠耳钉，不要多。</p>',
+      products: [
+        { name: '海军蓝束腰衬衫连衣裙', price: 698, img: 'images/unvesno-3.jpg' },
+        { name: 'Paisley 印花真丝长裙', price: 880, img: 'images/unvesno-2.jpg' },
+        { name: '米白蕾丝慵懒吊带', price: 489, img: 'images/unvesno-4.jpg' }
+      ]},
+    { name: '法式碎花', score: 85, rank: '风格挑战', rankClass: 'complement', tags: '法式·真丝 · 准确率 89%',
+      cover: 'images/dax-3.jpg', avatarImg: 'images/dax-3.jpg',
+      why: '约会需要一件"撑住氛围"的连衣裙。这件 100% 真丝水彩印花，光是飘起来就有故事。',
+      msg: '<p>女生衣橱里应该有一件能撑场的真丝裙。</p><p>这件水彩印花我做了 3 季——它不是潮流，是经典。婚礼、年会、画展开幕、约会都能穿。</p>',
+      products: [
+        { name: '100% 真丝水彩印花连衣裙', price: 1280, img: 'images/dax-3.jpg' },
+        { name: '油画印花深色吊带长裙', price: 1080, img: 'images/dax-4.jpg' }
+      ]},
+    { name: '叙白', score: 82, rank: '价格友好', rankClass: 'budget', tags: '甜美·新中式 · 准确率 87%',
+      cover: 'images/dax-2.jpg', avatarImg: 'images/dax-2.jpg',
+      why: '你最近搜过"显气质"，但你衣橱里全是廓形宽松款。叙白的雪纺贴身但不勒，刚好补缺口。',
+      msg: '<p>试试温柔感。叶纹雪纺罩衫光是站着就有故事。</p><p>面料一定要选真丝混纺，不然出门 2 小时就软塌了——这件我亲自盯过 3 版打样。</p>',
+      products: [
+        { name: '黄色叶纹雪纺罩衫', price: 329, img: 'images/dax-2.jpg' },
+        { name: '樱花蕾丝立领新中式', price: 289, img: 'images/dax-1.jpg' }
+      ]},
+    { name: '三克拉', score: 78, rank: '价格补全', rankClass: 'budget', tags: '日系·学院 · 准确率 85%',
+      cover: 'images/unvesno-1.jpg', avatarImg: 'images/unvesno-1.jpg',
+      why: '你近 3 个月平均客单 ¥420，我整套控制在 ¥600 内，没有为单品溢价。',
+      msg: '<p>不需要花太多。复古 Polo 配灰色百褶半裙——是 5 年都不会过时的组合。</p><p>关键是 Polo 衫领子要有钩花细节，不然就是普通学生装。</p>',
+      products: [
+        { name: '复古钩花领 Polo 针织', price: 198, img: 'images/unvesno-1.jpg' },
+        { name: '灰色百褶半裙', price: 229, img: 'images/unvesno-1.jpg' }
+      ]}
+  ];
+
+  const stackB = [
+    stackA[0],
+    { name: 'CHICJOC', score: 92, rank: '最匹配', rankClass: 'match', tags: '甜辣·复古 · 准确率 90%',
+      cover: 'images/sweet-3.jpg', avatarImg: 'images/sweet-3.jpg',
+      why: '你的"甜辣"画像 87% 重合 CHICJOC 客群。星星贴布Tee 和你已有的牛仔短裙是天作之合。',
+      msg: '<p>甜辣的核心是"违和感"——上身越乖巧，下装越叛逆。</p><p>星星贴布Tee 配做旧牛仔百褶，整个 Y2K 内味就出来了。</p>',
+      products: [
+        { name: '星星拼贴 Babytee', price: 188, img: 'images/sweet-3.jpg' },
+        { name: '卡通女孩 Raglan', price: 218, img: 'images/sweet-1.jpg' }
+      ]},
+    { name: 'NeweJeans', score: 88, rank: '最匹配', rankClass: 'match', tags: '甜酷·防晒 · 准确率 88%',
+      cover: 'images/sweet-2.jpg', avatarImg: 'images/sweet-2.jpg',
+      why: '你今年搜过 12 次"防晒"，这件 UPF50+ 是甜辣里的功能担当。',
+      msg: '<p>夏天要又凉又防晒还要好看——这件全做到了。</p><p>10A 抗菌、四面弹力、凉感系数 0.23。情侣款，可以拉男朋友一起穿。</p>',
+      products: [{ name: 'UPF50+ couple 卡通Tee', price: 198, img: 'images/sweet-2.jpg' }]},
+    stackA[3], stackA[4]
+  ];
+
+  let stackIdx = { A: 0, B: 0 };
+  const stackData = { A: stackA, B: stackB };
+
+  function renderStack(key) {
+    const stack = document.getElementById('stack' + key);
+    const data = stackData[key];
+    const idx = stackIdx[key];
+    stack.innerHTML = '';
+    data.forEach((a, i) => {
+      const offset = i - idx;
+      if (offset < 0 || offset > 2) return;
+      const card = document.createElement('div');
+      card.className = 'agent-card';
+      card.style.transform = `translateY(${offset * 8}px) scale(${1 - offset * 0.04})`;
+      card.style.zIndex = 10 - offset;
+      card.style.opacity = offset === 0 ? 1 : 0.55;
+
+      card.innerHTML = `
+        <div class="card-cover">
+          <img class="bg" src="${a.cover}" />
+          <span class="rank-tag ${a.rankClass}">${a.rank} · #${idx + 1}</span>
+          <div class="agent-badge">
+            <div class="agent-avatar"><img src="${a.avatarImg}"/><div class="ai-corner" style="width:14px;height:14px;font-size:7px;border-width:1.5px;">AI</div></div>
+            <div class="agent-info">
+              <div class="name">${a.name}<span class="ai-badge sm">AI 主理人</span></div>
+              <div class="meta">${a.tags} · <span class="score">${a.score}% 匹配</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="why-you"><span class="label">为什么推给你：</span>${a.why}</div>
+          <div class="agent-msg">${a.msg}</div>
+          <div class="product-row">
+            ${a.products.map(p => `
+              <div class="product-card">
+                <div class="product-img"><img src="${p.img}"/></div>
+                <div class="product-info">
+                  <div class="pname">${p.name}</div>
+                  <div class="pprice">¥${p.price}${p.old ? `<span class="old">¥${p.old}</span>` : ''}</div>
+                  <div class="product-actions">
+                    <div class="pa-btn cart" title="加入购物车">🛒</div>
+                    <div class="pa-btn buy" title="立即购买">购</div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="combine-hint">
+            <span class="ic">⊞</span>
+            <span>这件可与其他主理人单品组合成完整 look</span>
+          </div>
+        </div>
+      `;
+      stack.appendChild(card);
+    });
+    document.getElementById('progress' + key).textContent = `${Math.min(idx + 1, data.length)} / ${key === 'A' ? 10 : 12}`;
+  }
+
+  function swipe(key, dir) {
+    const data = stackData[key];
+    if (stackIdx[key] >= data.length - 1) stackIdx[key] = 0;
+    else stackIdx[key]++;
+    renderStack(key);
+  }
+
+  function goScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.screen-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.screen === id);
+    });
+    if (id === 's3a') { stackIdx.A = 0; renderStack('A'); }
+    if (id === 's3b') { stackIdx.B = 0; renderStack('B'); }
+  }
+
+  document.querySelectorAll('.screen-tab').forEach(tab => {
+    tab.addEventListener('click', () => goScreen(tab.dataset.screen));
+  });
+
+  renderStack('A');
+  renderStack('B');
+</script>
+
+</body>
+</html>
