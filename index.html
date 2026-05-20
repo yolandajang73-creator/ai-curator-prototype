@@ -671,6 +671,57 @@
         <div class="think-cta" id="thinkCta" onclick="goScreen(thinkTarget)">查看 10 位 AI 主理人方案</div>
       </div>
 
+      <!-- ============ S2-THINK: AI 思考过程 ============ -->
+      <div class="screen think-screen" id="s2think">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="back-bar"><div class="back-btn" onclick="goScreen('s1')">‹</div><div style="font-size:13px;color:#888;">AI 正在思考</div></div>
+
+        <div class="think-question">
+          <div class="label">你的问题</div>
+          <div id="thinkQ">"520 约会穿什么"</div>
+        </div>
+
+        <div class="think-steps" id="thinkSteps">
+          <div class="think-step" data-step="1">
+            <div class="step-num"><span>1</span></div>
+            <div class="step-content">
+              <div class="step-title">理解你的问题</div>
+              <div class="step-desc">这是一个 <span class="pill hl">场景型</span> 问题。识别到关键词 <span class="pill">浪漫约会</span>、<span class="pill">5月20日</span>、<span class="pill">需要多元风格碰撞</span>。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="2">
+            <div class="step-num"><span>2</span></div>
+            <div class="step-content">
+              <div class="step-title">读取你的助手档案</div>
+              <div class="step-desc">命中 <span class="pill hl">甜酷 87%</span>、<span class="pill hl">冷白皮</span>、<span class="pill hl">¥300-800 预算</span>，以及衣橱里 <span class="pill">缺正式连衣裙</span>。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="3">
+            <div class="step-num"><span>3</span></div>
+            <div class="step-content">
+              <div class="step-title">召集 AI 主理人</div>
+              <div class="step-desc">从 32 位 AI 主理人中筛出 <span class="pill hl">10 位</span>——匹配度 78% ~ 96%，覆盖你熟悉与未尝试的风格。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="4">
+            <div class="step-num"><span>4</span></div>
+            <div class="step-content">
+              <div class="step-title">综合排序</div>
+              <div class="step-desc"><span class="pill hl">3 最匹配</span> + <span class="pill hl">4 风格挑战</span> + <span class="pill hl">3 价格补全</span>，避免同质化、保留新鲜感。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="5">
+            <div class="step-num"><span>5</span></div>
+            <div class="step-content">
+              <div class="step-title">生成方案</div>
+              <div class="step-desc">每位 AI 主理人用自己的语气生成搭配建议，附"为什么是你"的解释。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="think-cta" id="thinkCta" onclick="goScreen(thinkTarget)">查看 10 位 AI 主理人方案</div>
+      </div>
+
       <!-- ============ S3a: 场景型 - 520 ============ -->
       <div class="screen stack-screen" id="s3a">
         <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
@@ -933,6 +984,14 @@
       </div>
 
       </div>
+
+      <!-- 全局固定底部对话栏 -->
+      <div class="chat-input-bar hidden" id="globalChatBar">
+        <div class="ic-btn">＋</div>
+        <div class="input-wrap"><span class="ai-mini"></span><span id="chatBarHint">跟 AI 主理人继续聊…</span></div>
+        <div class="send-btn">➤</div>
+      </div>
+
     </div>
     <div class="phone-label">AI 主理人 · 服饰垂类</div>
     <div class="screen-tabs">
@@ -1033,16 +1092,22 @@
     stackA[0],
     { name: 'CHICJOC', score: 92, rank: '最匹配', rankClass: 'match', tags: '甜辣·复古 · 准确率 90%',
       cover: 'images/sweet-3.jpg', avatarImg: 'images/sweet-3.jpg',
-      why: '你的"甜辣"画像 87% 重合 CHICJOC 客群。星星贴布Tee 和你已有的牛仔短裙是天作之合。',
-      msg: '<p>甜辣的核心是"违和感"——上身越乖巧，下装越叛逆。</p><p>星星贴布Tee 配做旧牛仔百褶，整个 Y2K 内味就出来了。</p>',
+      personaClass: 'bestie', personaLabel: '闺蜜悄悄话',
+      matchReason: '「甜辣」画像 87% 重合 CHICJOC 客群',
+      credentials: '4 年甜辣专做 · 上海买手店 30+ 家在售 · 复购率 38%',
+      msg: '<p>甜辣的核心是 <span class="hl">"违和感"</span>——上身越乖巧，下装越叛逆 💋</p><p>星星贴布Tee 用的是做旧水洗工艺，<span class="hl">每件颜色都有微妙差异</span>，不会撞衫。配你衣橱里的做旧牛仔百褶，Y2K 内味直接拉满。</p>',
+      ctaHint: '想看这套整体效果？姐拉你看模特图',
       products: [
         { name: '星星拼贴 Babytee', price: 188, img: 'images/sweet-3.jpg' },
         { name: '卡通女孩 Raglan', price: 218, img: 'images/sweet-1.jpg' }
       ]},
     { name: 'NeweJeans', score: 88, rank: '最匹配', rankClass: 'match', tags: '甜酷·防晒 · 准确率 88%',
       cover: 'images/sweet-2.jpg', avatarImg: 'images/sweet-2.jpg',
-      why: '你今年搜过 12 次"防晒"，这件 UPF50+ 是甜辣里的功能担当。',
-      msg: '<p>夏天要又凉又防晒还要好看——这件全做到了。</p><p>10A 抗菌、四面弹力、凉感系数 0.23。情侣款，可以拉男朋友一起穿。</p>',
+      personaClass: 'junior', personaLabel: '元气学妹',
+      matchReason: '今年搜过 12 次"防晒" · 偏好功能性甜酷',
+      credentials: '5 年功能性服饰 · UPF50+ 国家认证 · 与索罗娜联名',
+      msg: '<p>夏天又要凉又要防晒还要好看——这件全做到了！</p><p>面料是 <span class="hl">索罗娜® 凉感纤维</span>，凉感系数 0.23（行业平均 0.15），<span class="hl">10A 抗菌 + 四面弹力</span>。情侣款，可以拉男朋友一起穿～</p>',
+      ctaHint: '想问尺码或情侣款搭配？学妹随时在',
       products: [{ name: 'UPF50+ couple 卡通Tee', price: 198, img: 'images/sweet-2.jpg' }]},
     stackA[3], stackA[4]
   ];
@@ -1077,8 +1142,20 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="why-you"><span class="label">为什么推给你：</span>${a.why}</div>
-          <div class="agent-msg">${a.msg}</div>
+          <div class="match-info">
+            <div class="mi-row">
+              <span class="mi-key">✦ AI 匹配理由</span>
+              <span class="mi-val">${a.matchReason}</span>
+            </div>
+            <div class="mi-credentials">${a.credentials}</div>
+          </div>
+          <div class="persona-msg">
+            <div class="persona-head">
+              <span class="persona-tag ${a.personaClass}">${a.personaLabel}</span>
+              <span class="persona-name">${a.name} 想跟你说</span>
+            </div>
+            <div class="persona-body">${a.msg}</div>
+          </div>
           <div class="product-row">
             ${a.products.map(p => `
               <div class="product-card">
@@ -1094,9 +1171,13 @@
               </div>
             `).join('')}
           </div>
-          <div class="combine-hint">
-            <span class="ic">⊞</span>
-            <span>这件可与其他主理人单品组合成完整 look</span>
+          <div class="continue-chat" onclick="goScreen('s3c')">
+            <div class="cc-avatar"><img src="${a.avatarImg}"/></div>
+            <div class="cc-text">
+              <div class="cc-name">想再问问 ${a.name}？</div>
+              <div class="cc-hint">${a.ctaHint}</div>
+            </div>
+            <div class="cc-arrow">›</div>
           </div>
         </div>
       `;
@@ -1139,6 +1220,35 @@
       }, i * 700 + 300));
     });
     // 最后一步完成 + 显示 CTA
+    thinkTimers.push(setTimeout(() => {
+      steps[steps.length-1].classList.remove('processing');
+      steps[steps.length-1].classList.add('done');
+      document.getElementById('thinkCta').classList.add('show');
+    }, steps.length * 700 + 500));
+  }
+
+
+  // AI 思考过程：分步揭示
+  let thinkTarget = 's3a';
+  let thinkTimers = [];
+  function goThinking(target) {
+    thinkTarget = target;
+    const qMap = { 's3a': '"520 约会穿什么"', 's3b': '"给我推荐甜酷风衣服"' };
+    document.getElementById('thinkQ').textContent = qMap[target] || '';
+    goScreen('s2think');
+    thinkTimers.forEach(clearTimeout);
+    thinkTimers = [];
+    document.querySelectorAll('#thinkSteps .think-step').forEach(s => {
+      s.classList.remove('show', 'done', 'processing');
+    });
+    document.getElementById('thinkCta').classList.remove('show');
+    const steps = document.querySelectorAll('#thinkSteps .think-step');
+    steps.forEach((step, i) => {
+      thinkTimers.push(setTimeout(() => {
+        step.classList.add('show', 'processing');
+        if (i > 0) { steps[i-1].classList.remove('processing'); steps[i-1].classList.add('done'); }
+      }, i * 700 + 300));
+    });
     thinkTimers.push(setTimeout(() => {
       steps[steps.length-1].classList.remove('processing');
       steps[steps.length-1].classList.add('done');
