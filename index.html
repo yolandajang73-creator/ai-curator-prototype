@@ -378,12 +378,14 @@
   /* ============ 通用底部对话栏 ============ */
   .chat-input-bar {
     position: absolute; bottom: 0; left: 0; right: 0;
-    background: #fff;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(10px);
     border-top: 1px solid #eee;
     padding: 10px 14px;
     display: flex; align-items: center; gap: 8px;
-    z-index: 20;
+    z-index: 100;
   }
+  .chat-input-bar.hidden { display: none; }
   .chat-input-bar .ic-btn {
     width: 32px; height: 32px; border-radius: 50%;
     background: #f5f5f5; color: #555;
@@ -464,6 +466,53 @@
 
   /* ============ Tab 移到下方 ============ */
   .screen-tabs { margin-top: 16px; margin-bottom: 0; }
+
+
+
+  /* ============ Module 1: 匹配信息（轻量） ============ */
+  .match-info {
+    background: #f9fafb;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 11px;
+  }
+  .match-info .mi-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .match-info .mi-key { color: #6366f1; font-weight: 600; font-size: 11px; }
+  .match-info .mi-val { color: #4b5563; text-align: right; font-size: 11px; }
+  .match-info .mi-credentials {
+    font-size: 10px; color: #9ca3af;
+    border-top: 1px dashed #e5e7eb;
+    padding-top: 6px; margin-top: 4px;
+  }
+
+  /* ============ Module 2: 人格化软文（重头戏） ============ */
+  .persona-msg {
+    background: linear-gradient(135deg, #fff7ed 0%, #fff 60%);
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .persona-head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #fed7aa;
+  }
+  .persona-head .persona-name {
+    font-size: 12px; color: #9a3412; font-weight: 600;
+  }
+  .persona-body {
+    font-size: 13px; line-height: 1.75; color: #1a1a1a;
+  }
+  .persona-body p { margin-bottom: 6px; }
+  .persona-body p:last-child { margin-bottom: 0; }
+  .persona-body .hl { color: #c2410c; font-weight: 700; }
 
 </style>
 </head>
@@ -634,11 +683,6 @@
           <button class="act-btn like" onclick="swipe('A',1)">♡</button>
           <button class="act-btn combine" onclick="goScreen('s4')">⊞</button>
         </div>
-        <div class="chat-input-bar">
-          <div class="ic-btn">＋</div>
-          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
-          <div class="send-btn">➤</div>
-        </div>
 
       </div>
 
@@ -653,11 +697,6 @@
           <button class="act-btn cart" onclick="swipe('B',0)">🛒</button>
           <button class="act-btn like" onclick="swipe('B',1)">♡</button>
           <button class="act-btn combine" onclick="goScreen('s4')">⊞</button>
-        </div>
-        <div class="chat-input-bar">
-          <div class="ic-btn">＋</div>
-          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
-          <div class="send-btn">➤</div>
         </div>
 
       </div>
@@ -734,11 +773,6 @@
             <div class="chip" style="background:#fff7ed;color:#9a3412;border-color:#fed7aa;cursor:pointer;">看展逛街</div>
             <div class="chip" style="background:#1a1a1a;color:#fff;border-color:#1a1a1a;cursor:pointer;">让她猜 →</div>
           </div>
-        </div>
-        <div class="chat-input-bar">
-          <div class="ic-btn">＋</div>
-          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
-          <div class="send-btn">➤</div>
         </div>
 
       </div>
@@ -819,11 +853,6 @@
             </div>
           </div>
         </div>
-        <div class="chat-input-bar">
-          <div class="ic-btn">＋</div>
-          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
-          <div class="send-btn">➤</div>
-        </div>
 
       </div>
 
@@ -900,11 +929,6 @@
             </div>
           </div>
         </div>
-        <div class="chat-input-bar">
-          <div class="ic-btn">＋</div>
-          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
-          <div class="send-btn">➤</div>
-        </div>
 
       </div>
 
@@ -949,8 +973,9 @@
     { name: '赵大喜', score: 96, rank: '最匹配', rankClass: 'match', tags: '甜酷·Y2K · 准确率 94%',
       cover: 'images/sweet-4.jpg', avatarImg: 'images/sweet-4.jpg',
       personaClass: 'bestie', personaLabel: '闺蜜悄悄话',
-      why: '你档案里"甜酷"权重 87%，最近收藏过 3 件刺绣Tee，本期上新有 2 件直接命中。',
-      msg: '<p>哎宝你听姐说～约会不要太"用力"，让对方记住的是你的状态不是衣服 💋</p><p>红苹果Tee + 做旧牛仔，星贴布做点睛——这种"努力但不刻意"的甜辣，绝对绝。</p>',
+      matchReason: '「甜酷」87% × 收藏过 3 件刺绣Tee',
+      credentials: '5 年甜辣 IP · 抖音粉丝 380 万 · 复购率 42% · 已服务过 12 万 165 身高用户',
+      msg: '<p>哎宝你听姐说～约会千万别太"用力"，让对方记住的是你的状态不是衣服 💋</p><p>这件红苹果Tee 是姐今年的得意之作，<span class="hl">我特意挑了日本进口的 250g 重磅棉</span>，垂感好不会贴肉显胖，胸前那颗苹果是手工刺绣的，姐盯了 4 版才定稿。</p><p>你 165/48 这种娇小身材，配做旧牛仔短裤+小白鞋绝绝子，约会场合显得清爽又有腔调，姐替你想好了你不用怕～</p>',
       ctaHint: '想问尺码？想知道怎么搭？姐在 1V1 等你～',
       products: [
         { name: '红苹果刺绣短Tee', price: 268, old: 328, img: 'images/sweet-4.jpg' },
@@ -960,8 +985,9 @@
     { name: 'UNVESNO', score: 89, rank: '风格挑战', rankClass: 'complement', tags: '法式·极简 · 准确率 91%',
       cover: 'images/unvesno-3.jpg', avatarImg: 'images/unvesno-3.jpg',
       personaClass: 'minimal', personaLabel: '直给型',
-      why: '反向推荐——你常穿"甜",但 520 换个气质会让对方眼前一亮。你的骨架适合直线条剪裁。',
-      msg: '<p>你的骨架适合直线条。</p><p>海军蓝束腰衬衫连衣裙 + 灰百褶。一颗珍珠耳钉。</p><p>不需要更多。</p>',
+      matchReason: '反向推荐 · 骨架直线条 + 你少一件正式连衣裙',
+      credentials: '8 年极简品牌 · 巴黎/东京买手店在售 · 100% 真丝/羊毛重磅面料',
+      msg: '<p>你的骨架适合直线条。</p><p>这件海军蓝衬衫连衣裙，<span class="hl">用的是 60 支真丝棉混纺，垂坠感强，不易皱</span>。腰线特意做高了 2cm，视觉上能拉长比例——你 165 这种身高，穿出来像 170。</p><p>520 别穿粉色。海军蓝 + 灰百褶 + 一颗珍珠耳钉。不需要更多。</p>',
       ctaHint: '需要正式场合的方案？我可以为你定制',
       products: [
         { name: '海军蓝束腰衬衫连衣裙', price: 698, img: 'images/unvesno-3.jpg' },
@@ -971,8 +997,9 @@
     { name: '法式碎花', score: 85, rank: '风格挑战', rankClass: 'complement', tags: '法式·真丝 · 准确率 89%',
       cover: 'images/dax-3.jpg', avatarImg: 'images/dax-3.jpg',
       personaClass: 'elder-sis', personaLabel: '熟女姐姐',
-      why: '约会需要一件"撑住氛围"的连衣裙。这件 100% 真丝水彩印花，光是飘起来就有故事。',
-      msg: '<p>亲爱的，姐跟你说一个真理：女生衣橱里应该有一件能撑场的真丝裙。</p><p>这件水彩印花姐做了 3 季——它不是潮流，是经典。婚礼、年会、画展、约会都能穿。一件能穿 10 年的，比 10 件平价快时尚都值。</p>',
+      matchReason: '你衣橱缺撑场连衣裙 + 预算上调 18%',
+      credentials: '12 年设计经验 · 前 LANVIN 设计师 · 真丝供应商为 LV 同款工厂',
+      msg: '<p>亲爱的，姐跟你说一个真理：<span class="hl">女生衣橱里应该有一件能撑场的真丝裙</span>。</p><p>这件水彩印花姐做了 3 季——花型是姐自己手绘的，<span class="hl">面料用的是杭州六和真丝厂的 16 姆米桑波缎</span>，跟 LV 是同一家供应商，悬垂感和光泽度都拉满。</p><p>姐替你算过，你买 10 件 ¥128 的快时尚穿不过一季，不如这一件穿 10 年——婚礼、年会、画展开幕、约会都能穿。这就是姐说的"长期主义"。</p>',
       ctaHint: '想了解面料？想问保养？姐慢慢跟你聊',
       products: [
         { name: '100% 真丝水彩印花连衣裙', price: 1280, img: 'images/dax-3.jpg' },
@@ -981,8 +1008,9 @@
     { name: '叙白', score: 82, rank: '价格友好', rankClass: 'budget', tags: '甜美·新中式 · 准确率 87%',
       cover: 'images/dax-2.jpg', avatarImg: 'images/dax-2.jpg',
       personaClass: 'gentle', personaLabel: '清纯学姐',
-      why: '你最近搜过"显气质"，但你衣橱里全是廓形宽松款。叙白的雪纺贴身但不勒，刚好补缺口。',
-      msg: '<p>看到你最近搜了"显气质"对不对～</p><p>试试温柔感叶纹雪纺罩衫，光是站着就有故事感。提醒你哦，面料要选真丝混纺，不然出门 2 小时就软塌了——这件学姐亲自盯过 3 版打样的，放心入。</p>',
+      matchReason: '搜过"显气质" + 衣橱全廓形宽松款',
+      credentials: '6 年新中式品牌 · 苏绣非遗传承人合作款 · 90% 客户复购',
+      msg: '<p>看到你最近搜了"显气质"对不对～学姐特意为你挑了这件叶纹雪纺。</p><p><span class="hl">面料是真丝混纺的，不是普通涤纶</span>——学姐亲自盯过 3 版打样，普通雪纺出门 2 小时就软塌，这件能撑 8 小时还有形。叶纹是数码印花做的渐变，比丝网印更有水彩质感。</p><p>姐知道你预算敏感，所以定价控制在 ¥329——同等面料市面上要卖 ¥500+。这件能搭你衣橱里 80% 的内搭，慢慢来，气质这件事不用急 🌿</p>',
       ctaHint: '想问搭配？想看更多温柔款？跟学姐聊聊',
       products: [
         { name: '黄色叶纹雪纺罩衫', price: 329, img: 'images/dax-2.jpg' },
@@ -991,8 +1019,9 @@
     { name: '三克拉', score: 78, rank: '价格补全', rankClass: 'budget', tags: '日系·学院 · 准确率 85%',
       cover: 'images/unvesno-1.jpg', avatarImg: 'images/unvesno-1.jpg',
       personaClass: 'junior', personaLabel: '甜酷学妹',
-      why: '你近 3 个月平均客单 ¥420，我整套控制在 ¥600 内，没有为单品溢价。',
-      msg: '<p>嘿姐姐！😊 学妹我观察你近 3 个月平均客单 ¥420，所以整套帮你控制在 ¥600 内啦，不让你心疼 💸</p><p>复古 Polo + 灰色百褶——5 年都不过时的搭配！记得选 Polo 领有钩花细节的那种，不然就是普通学生装啦～</p>',
+      matchReason: '近 3 月平均客单 ¥420 · 整套控价 ¥600 内',
+      credentials: '日系学院风专做 · 与京都老牌制衣厂合作 · 平价不平质',
+      msg: '<p>嘿姐姐！😊 学妹我观察你近 3 个月平均客单 ¥420，所以这套帮你严格控价在 ¥600 内，不让你心疼 💸</p><p>这件复古 Polo <span class="hl">领口是手工钩花的</span>，不是机器织——所以才有那种"日杂感"，普通校服 Polo 比不了。配的灰色百褶用的是垂感羊毛混纺，<span class="hl">不会像普通百褶裙起静电、夹腿</span>。</p><p>学妹真的不希望你"便宜买废"——预算有限的话，<span class="hl">把钱花在细节上</span>，比花在 logo 上值多了！这套 5 年都不过时～</p>',
       ctaHint: '想看更多平价好搭？学妹给你扒同款～',
       products: [
         { name: '复古钩花领 Polo 针织', price: 198, img: 'images/unvesno-1.jpg' },
@@ -1125,6 +1154,22 @@
     });
     if (id === 's3a') { stackIdx.A = 0; renderStack('A'); }
     if (id === 's3b') { stackIdx.B = 0; renderStack('B'); }
+    // 控制底部对话栏：S1、S2-think 隐藏，其他显示
+    const bar = document.getElementById('globalChatBar');
+    const noBarScreens = ['s1', 's2think'];
+    if (noBarScreens.includes(id)) { bar.classList.add('hidden'); }
+    else {
+      bar.classList.remove('hidden');
+      // 不同页面提示语
+      const hints = {
+        's3a': '想继续问 AI 主理人？',
+        's3b': '想继续问 AI 主理人？',
+        's3c': '继续跟赵大喜聊…',
+        's3d': '问问 AI 主理人怎么补缺口',
+        's4': '想换一套？继续聊…'
+      };
+      document.getElementById('chatBarHint').textContent = hints[id] || '跟 AI 主理人继续聊…';
+    }
   }
 
   document.querySelectorAll('.screen-tab').forEach(tab => {
@@ -1133,6 +1178,7 @@
 
   renderStack('A');
   renderStack('B');
+  document.getElementById('globalChatBar').classList.add('hidden');
 </script>
 
 </body>
