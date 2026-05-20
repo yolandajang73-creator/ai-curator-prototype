@@ -1228,33 +1228,6 @@
   }
 
 
-  // AI 思考过程：分步揭示
-  let thinkTarget = 's3a';
-  let thinkTimers = [];
-  function goThinking(target) {
-    thinkTarget = target;
-    const qMap = { 's3a': '"520 约会穿什么"', 's3b': '"给我推荐甜酷风衣服"' };
-    document.getElementById('thinkQ').textContent = qMap[target] || '';
-    goScreen('s2think');
-    thinkTimers.forEach(clearTimeout);
-    thinkTimers = [];
-    document.querySelectorAll('#thinkSteps .think-step').forEach(s => {
-      s.classList.remove('show', 'done', 'processing');
-    });
-    document.getElementById('thinkCta').classList.remove('show');
-    const steps = document.querySelectorAll('#thinkSteps .think-step');
-    steps.forEach((step, i) => {
-      thinkTimers.push(setTimeout(() => {
-        step.classList.add('show', 'processing');
-        if (i > 0) { steps[i-1].classList.remove('processing'); steps[i-1].classList.add('done'); }
-      }, i * 700 + 300));
-    });
-    thinkTimers.push(setTimeout(() => {
-      steps[steps.length-1].classList.remove('processing');
-      steps[steps.length-1].classList.add('done');
-      document.getElementById('thinkCta').classList.add('show');
-    }, steps.length * 700 + 500));
-  }
 
   function goScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
