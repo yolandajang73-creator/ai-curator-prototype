@@ -259,21 +259,218 @@
     margin-bottom: 6px;
   }
   .hero-mark::before { content: '✦'; }
+
+
+  /* ============ 我的助手卡（替代档案chips）============ */
+  .assistant-card {
+    margin: 12px 20px 0;
+    background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+    border: 1px solid rgba(99,102,241,0.18);
+    border-radius: 16px;
+    padding: 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .assistant-card::before {
+    content: ''; position: absolute; top: -20px; right: -20px;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.18), transparent 70%);
+  }
+  .ac-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ac-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #fff;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    position: relative;
+  }
+  .ac-avatar::after {
+    content: ''; position: absolute; bottom: -2px; right: -2px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #4ade80; border: 2px solid #fff;
+  }
+  .ac-name { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+  .ac-name .ac-tag { font-size: 9px; color: #6366f1; font-weight: 600; margin-left: 4px; }
+  .ac-meta { font-size: 10px; color: #6366f1; margin-top: 1px; }
+  .ac-meta .dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: #4ade80; margin-right: 4px; vertical-align: middle; }
+  .ac-body {
+    font-size: 12px; color: #4c1d95; line-height: 1.65;
+    background: rgba(255,255,255,0.6);
+    padding: 8px 10px; border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .ac-body .hl { color: #6366f1; font-weight: 700; }
+  .ac-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px;
+  }
+  .ac-stats { color: #6b7280; }
+  .ac-stats b { color: #4c1d95; font-weight: 700; }
+  .ac-cta { color: #6366f1; font-weight: 600; }
+
+  /* ============ AI 思考过程屏 ============ */
+  .think-screen { padding: 0 0 30px; background: #fafafa; }
+  .think-question {
+    margin: 12px 24px 16px; padding: 14px 16px;
+    background: #1a1a1a; color: #fff;
+    border-radius: 14px;
+    font-size: 14px; font-weight: 600;
+  }
+  .think-question .label { font-size: 10px; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .think-steps { padding: 0 24px; }
+  .think-step {
+    display: flex; gap: 12px; padding: 14px 0;
+    border-bottom: 1px dashed #e5e5e5;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .think-step.show { opacity: 1; transform: translateX(0); }
+  .think-step:last-child { border-bottom: none; }
+  .step-num {
+    flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+    background: #f3f4f6; color: #9ca3af;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    transition: all 0.3s;
+  }
+  .think-step.done .step-num { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; }
+  .think-step.done .step-num::before { content: '✓'; }
+  .think-step.done .step-num span { display: none; }
+  .step-content { flex: 1; }
+  .step-title {
+    font-size: 13px; font-weight: 700; color: #1a1a1a;
+    margin-bottom: 4px;
+  }
+  .step-desc { font-size: 11px; color: #6b7280; line-height: 1.6; }
+  .step-desc .pill {
+    display: inline-block;
+    background: #f3f4f6;
+    border-radius: 100px; padding: 2px 8px; font-size: 10px;
+    margin: 1px 2px; color: #4b5563;
+  }
+  .step-desc .pill.hl { background: #ede9fe; color: #6366f1; font-weight: 600; }
+  .think-step.processing .step-num {
+    background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff;
+    animation: pulse-blue 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-blue {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99,102,241,0.5); }
+    50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+  }
+  .think-cta {
+    margin: 20px 24px 0;
+    padding: 14px;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 14px;
+    text-align: center;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .think-cta.show { opacity: 1; }
+  .think-cta::after { content: ' →'; }
+
+  /* ============ 通用底部对话栏 ============ */
+  .chat-input-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-top: 1px solid #eee;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+    z-index: 20;
+  }
+  .chat-input-bar .ic-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #f5f5f5; color: #555;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer; flex-shrink: 0;
+  }
+  .chat-input-bar .input-wrap {
+    flex: 1; background: #f5f5f5; border-radius: 100px;
+    padding: 8px 14px; font-size: 13px; color: #888;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .chat-input-bar .input-wrap .ai-mini {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff; font-size: 9px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .chat-input-bar .input-wrap .ai-mini::before { content: '✦'; }
+  .chat-input-bar .send-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer; flex-shrink: 0;
+  }
+
+  /* 调整 padding 给底部留 chat input 空间 */
+  .stack-screen { padding-bottom: 0; }
+  .diag-screen { padding-bottom: 70px; }
+  .combine-screen { padding-bottom: 70px; }
+  .chat-screen { padding-bottom: 60px; }
+  .action-bar { bottom: 70px; }
+
+  /* ============ 继续聊按钮（卡片底部） ============ */
+  .continue-chat {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #fff7ed, #fef3c7);
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .continue-chat:active { transform: scale(0.98); }
+  .continue-chat .cc-avatar {
+    width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+    border: 1.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    position: relative;
+  }
+  .continue-chat .cc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .continue-chat .cc-text {
+    flex: 1; font-size: 12px; line-height: 1.4;
+  }
+  .continue-chat .cc-text .cc-name {
+    color: #1a1a1a; font-weight: 700; font-size: 12px;
+  }
+  .continue-chat .cc-text .cc-hint {
+    color: #9a3412; font-size: 11px; margin-top: 2px;
+  }
+  .continue-chat .cc-arrow {
+    color: #ea580c; font-size: 18px; font-weight: 600;
+  }
+
+  /* ============ 人格化语气标签 ============ */
+  .persona-tag {
+    display: inline-block;
+    font-size: 9px; padding: 2px 7px; border-radius: 100px;
+    font-weight: 600; margin-left: 6px;
+    vertical-align: middle;
+  }
+  .persona-tag.bestie { background: #fce7f3; color: #be185d; }
+  .persona-tag.elder-sis { background: #fef3c7; color: #92400e; }
+  .persona-tag.minimal { background: #e5e7eb; color: #374151; }
+  .persona-tag.gentle { background: #dcfce7; color: #166534; }
+  .persona-tag.junior { background: #cffafe; color: #0e7490; }
+
+  /* ============ Tab 移到下方 ============ */
+  .screen-tabs { margin-top: 16px; margin-bottom: 0; }
+
 </style>
 </head>
 <body>
 
 <div class="stage">
   <div>
-    <div class="screen-tabs">
-      <div class="screen-tab active" data-screen="s1">① 提问入口</div>
-      <div class="screen-tab" data-screen="s3a">③ 场景型·520</div>
-      <div class="screen-tab" data-screen="s3b">③ 风格型·甜辣</div>
-      <div class="screen-tab" data-screen="s3c">③ 1V1·赵大喜</div>
-      <div class="screen-tab" data-screen="s3d">③ 诊断·衣橱</div>
-      <div class="screen-tab" data-screen="s4">④ 跨家组合</div>
-    </div>
-
     <div class="phone">
       <div class="phone-inner">
 
@@ -289,13 +486,21 @@
           <input placeholder="想穿成什么样？跟主理人聊聊" />
           <span class="icon">🎤</span>
         </div>
-        <div class="profile-row">
-          <div class="chip primary"><span class="dot"></span>我的档案</div>
-          <div class="chip">165cm · 48kg</div>
-          <div class="chip">冷白皮</div>
-          <div class="chip">甜酷·法式</div>
-          <div class="chip">¥300-800</div>
-          <div class="chip">+ 编辑</div>
+        <div class="assistant-card" onclick="alert('打开「我的助手」详情页\n· 查看 AI 学到了什么\n· 调整偏好设置\n· 查看决策依据明细')">
+          <div class="ac-head">
+            <div class="ac-avatar">✦</div>
+            <div>
+              <div class="ac-name">我的小助手<span class="ac-tag">AI · 已陪伴 23 天</span></div>
+              <div class="ac-meta"><span class="dot"></span>正在持续学习你的偏好</div>
+            </div>
+          </div>
+          <div class="ac-body">
+            我注意到你最近在看 <span class="hl">小香风</span>，开始更偏 <span class="hl">甜酷 ›  法式</span>，预算比上月提升 <span class="hl">18%</span>。下次你提问，我会优先用这些信息。
+          </div>
+          <div class="ac-footer">
+            <div class="ac-stats">已学习 <b>83 件衣橱</b> · <b>30 天浏览</b> · <b>165/48 · 冷白皮</b></div>
+            <div class="ac-cta">管理 ›</div>
+          </div>
         </div>
 
         <div class="hint-section">
@@ -304,14 +509,14 @@
             <span style="color:#ccc;">点击试试 →</span>
           </div>
           <div class="hint-grid">
-            <div class="hint-item" onclick="goScreen('s3a')">
+            <div class="hint-item" onclick="goThinking('s3a')">
               <span>520 约会穿什么</span>
               <span style="display:flex;align-items:center;">
                 <span class="level">场景型 · 32 位 AI 主理人在线</span>
                 <span class="arrow">›</span>
               </span>
             </div>
-            <div class="hint-item" onclick="goScreen('s3b')">
+            <div class="hint-item" onclick="goThinking('s3b')">
               <span>给我推荐甜酷风衣服</span>
               <span style="display:flex;align-items:center;">
                 <span class="level">风格型 · 12 位匹配</span>
@@ -366,6 +571,57 @@
         </div>
       </div>
 
+      <!-- ============ S2-THINK: AI 思考过程 ============ -->
+      <div class="screen think-screen" id="s2think">
+        <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
+        <div class="back-bar"><div class="back-btn" onclick="goScreen('s1')">‹</div><div style="font-size:13px;color:#888;">AI 正在思考</div></div>
+
+        <div class="think-question">
+          <div class="label">你的问题</div>
+          <div id="thinkQ">"520 约会穿什么"</div>
+        </div>
+
+        <div class="think-steps" id="thinkSteps">
+          <div class="think-step" data-step="1">
+            <div class="step-num"><span>1</span></div>
+            <div class="step-content">
+              <div class="step-title">理解你的问题</div>
+              <div class="step-desc">这是一个 <span class="pill hl">场景型</span> 问题。我识别到 <span class="pill">浪漫约会</span>、<span class="pill">5月20日</span>、<span class="pill">需要多元风格碰撞</span>。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="2">
+            <div class="step-num"><span>2</span></div>
+            <div class="step-content">
+              <div class="step-title">读取你的助手档案</div>
+              <div class="step-desc">命中关键信息 <span class="pill hl">甜酷 87%</span>、<span class="pill hl">冷白皮</span>、<span class="pill hl">¥300-800 预算</span>，以及衣橱里 <span class="pill">缺正式连衣裙</span>。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="3">
+            <div class="step-num"><span>3</span></div>
+            <div class="step-content">
+              <div class="step-title">召集 AI 主理人</div>
+              <div class="step-desc">从 32 位 AI 主理人中筛出 <span class="pill hl">10 位</span>——风格匹配度从 78% ~ 96%，覆盖你熟悉与未尝试的风格。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="4">
+            <div class="step-num"><span>4</span></div>
+            <div class="step-content">
+              <div class="step-title">综合排序</div>
+              <div class="step-desc"><span class="pill hl">3 最匹配</span> + <span class="pill hl">4 风格挑战</span> + <span class="pill hl">3 价格补全</span>，避免同质化、保留新鲜感。</div>
+            </div>
+          </div>
+          <div class="think-step" data-step="5">
+            <div class="step-num"><span>5</span></div>
+            <div class="step-content">
+              <div class="step-title">生成方案</div>
+              <div class="step-desc">每位 AI 主理人用自己的语气生成搭配建议，并附"为什么是你"的解释。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="think-cta" id="thinkCta" onclick="goScreen(thinkTarget)">查看 10 位 AI 主理人方案</div>
+      </div>
+
       <!-- ============ S3a: 场景型 - 520 ============ -->
       <div class="screen stack-screen" id="s3a">
         <div class="status-bar"><span>9:41</span><span class="right">●●● 5G</span></div>
@@ -378,6 +634,12 @@
           <button class="act-btn like" onclick="swipe('A',1)">♡</button>
           <button class="act-btn combine" onclick="goScreen('s4')">⊞</button>
         </div>
+        <div class="chat-input-bar">
+          <div class="ic-btn">＋</div>
+          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
+          <div class="send-btn">➤</div>
+        </div>
+
       </div>
 
       <!-- ============ S3b: 风格型 - 甜辣 ============ -->
@@ -392,6 +654,12 @@
           <button class="act-btn like" onclick="swipe('B',1)">♡</button>
           <button class="act-btn combine" onclick="goScreen('s4')">⊞</button>
         </div>
+        <div class="chat-input-bar">
+          <div class="ic-btn">＋</div>
+          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
+          <div class="send-btn">➤</div>
+        </div>
+
       </div>
 
       <!-- ============ S3c: 1V1 - 赵大喜 (商品横滑) ============ -->
@@ -411,9 +679,10 @@
         <div class="chat-msg">
           <div class="bubble user">赵大喜最近上新了，哪些适合我？</div>
           <div class="bubble agent">
-            嘿小杨～看到你了。📌 我对你的印象：165/48 冷白皮、衣橱里 60% 红色系、最近老在看小香风。
+            <span style="font-size:11px;color:#be185d;font-weight:700;margin-right:4px;">闺蜜悄悄话</span><br/>
+            哎宝你来啦～💕 我刚翻了下你的档案：<b>165/48 冷白皮、衣橱里 60% 红色系</b>，最近老搜小香风对吧？
             <br/><br/>
-            这次上新 23 件，我帮你过了一遍，4 件你能直接闭眼入：
+            姐这次上新 23 件，我替你筛了一遍，<b>4 件你直接闭眼入不踩雷</b>：
           </div>
 
           <!-- 横向滚动商品 -->
@@ -456,9 +725,8 @@
           </div>
 
           <div class="bubble agent">
-            其中那件红色苹果Tee我建议你拿——你上个月在我直播间问过类似款没等到尺码，这次补到 S 了。
-            <br/><br/>
-            如果你想我按"约会场景"再帮你配一套，告诉我场地和对方风格，我立刻给你出 look。
+            那件 <b>红苹果Tee</b> 你必须拿！上次直播你问过类似款没赶上尺码，姐这次给你留 S 了 🎁<br/><br/>
+            约会要不要给你配一整套？告诉我场地和对方风格，姐立刻给你出 look 🤝
           </div>
           <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
             <div class="chip" style="background:#fff7ed;color:#9a3412;border-color:#fed7aa;cursor:pointer;">户外野餐</div>
@@ -467,6 +735,12 @@
             <div class="chip" style="background:#1a1a1a;color:#fff;border-color:#1a1a1a;cursor:pointer;">让她猜 →</div>
           </div>
         </div>
+        <div class="chat-input-bar">
+          <div class="ic-btn">＋</div>
+          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
+          <div class="send-btn">➤</div>
+        </div>
+
       </div>
 
       <!-- ============ S3d: 诊断 ============ -->
@@ -545,6 +819,12 @@
             </div>
           </div>
         </div>
+        <div class="chat-input-bar">
+          <div class="ic-btn">＋</div>
+          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
+          <div class="send-btn">➤</div>
+        </div>
+
       </div>
 
       <!-- ============ S4: Combine ============ -->
@@ -620,11 +900,26 @@
             </div>
           </div>
         </div>
+        <div class="chat-input-bar">
+          <div class="ic-btn">＋</div>
+          <div class="input-wrap"><span class="ai-mini"></span><span>跟 AI 主理人继续聊…</span></div>
+          <div class="send-btn">➤</div>
+        </div>
+
       </div>
 
       </div>
     </div>
-    <div class="phone-label">主理人 Agent · 服饰垂类 v3.1</div>
+    <div class="phone-label">AI 主理人 · 服饰垂类</div>
+    <div class="screen-tabs">
+      <div class="screen-tab active" data-screen="s1">① 提问入口</div>
+      <div class="screen-tab" data-screen="s2think">② AI 思考</div>
+      <div class="screen-tab" data-screen="s3a">③ 场景型·520</div>
+      <div class="screen-tab" data-screen="s3b">③ 风格型·甜辣</div>
+      <div class="screen-tab" data-screen="s3c">③ 1V1·赵大喜</div>
+      <div class="screen-tab" data-screen="s3d">③ 诊断·衣橱</div>
+      <div class="screen-tab" data-screen="s4">④ 跨家组合</div>
+    </div>
   </div>
 
   <div class="annotations">
@@ -653,8 +948,10 @@
   const stackA = [
     { name: '赵大喜', score: 96, rank: '最匹配', rankClass: 'match', tags: '甜酷·Y2K · 准确率 94%',
       cover: 'images/sweet-4.jpg', avatarImg: 'images/sweet-4.jpg',
+      personaClass: 'bestie', personaLabel: '闺蜜悄悄话',
       why: '你档案里"甜酷"权重 87%，最近收藏过 3 件刺绣Tee，本期上新有 2 件直接命中。',
-      msg: '<p>约会不要太"用力"，让对方记住的是你的状态而不是衣服。</p><p>红苹果刺绣Tee 配做旧牛仔，star贴布做点睛——一种"努力但不刻意"的甜辣。</p>',
+      msg: '<p>哎宝你听姐说～约会不要太"用力"，让对方记住的是你的状态不是衣服 💋</p><p>红苹果Tee + 做旧牛仔，星贴布做点睛——这种"努力但不刻意"的甜辣，绝对绝。</p>',
+      ctaHint: '想问尺码？想知道怎么搭？姐在 1V1 等你～',
       products: [
         { name: '红苹果刺绣短Tee', price: 268, old: 328, img: 'images/sweet-4.jpg' },
         { name: '海军蓝星星贴布Tee', price: 288, img: 'images/sweet-3.jpg' },
@@ -662,8 +959,10 @@
       ]},
     { name: 'UNVESNO', score: 89, rank: '风格挑战', rankClass: 'complement', tags: '法式·极简 · 准确率 91%',
       cover: 'images/unvesno-3.jpg', avatarImg: 'images/unvesno-3.jpg',
+      personaClass: 'minimal', personaLabel: '直给型',
       why: '反向推荐——你常穿"甜",但 520 换个气质会让对方眼前一亮。你的骨架适合直线条剪裁。',
-      msg: '<p>反向操作。如果他每次都看到你穿粉色，这次试试海军蓝束腰衬衫+灰百褶。</p><p>安静的浪漫比刻意的可爱更有杀伤力。配饰只用一颗珍珠耳钉，不要多。</p>',
+      msg: '<p>你的骨架适合直线条。</p><p>海军蓝束腰衬衫连衣裙 + 灰百褶。一颗珍珠耳钉。</p><p>不需要更多。</p>',
+      ctaHint: '需要正式场合的方案？我可以为你定制',
       products: [
         { name: '海军蓝束腰衬衫连衣裙', price: 698, img: 'images/unvesno-3.jpg' },
         { name: 'Paisley 印花真丝长裙', price: 880, img: 'images/unvesno-2.jpg' },
@@ -671,24 +970,30 @@
       ]},
     { name: '法式碎花', score: 85, rank: '风格挑战', rankClass: 'complement', tags: '法式·真丝 · 准确率 89%',
       cover: 'images/dax-3.jpg', avatarImg: 'images/dax-3.jpg',
+      personaClass: 'elder-sis', personaLabel: '熟女姐姐',
       why: '约会需要一件"撑住氛围"的连衣裙。这件 100% 真丝水彩印花，光是飘起来就有故事。',
-      msg: '<p>女生衣橱里应该有一件能撑场的真丝裙。</p><p>这件水彩印花我做了 3 季——它不是潮流，是经典。婚礼、年会、画展开幕、约会都能穿。</p>',
+      msg: '<p>亲爱的，姐跟你说一个真理：女生衣橱里应该有一件能撑场的真丝裙。</p><p>这件水彩印花姐做了 3 季——它不是潮流，是经典。婚礼、年会、画展、约会都能穿。一件能穿 10 年的，比 10 件平价快时尚都值。</p>',
+      ctaHint: '想了解面料？想问保养？姐慢慢跟你聊',
       products: [
         { name: '100% 真丝水彩印花连衣裙', price: 1280, img: 'images/dax-3.jpg' },
         { name: '油画印花深色吊带长裙', price: 1080, img: 'images/dax-4.jpg' }
       ]},
     { name: '叙白', score: 82, rank: '价格友好', rankClass: 'budget', tags: '甜美·新中式 · 准确率 87%',
       cover: 'images/dax-2.jpg', avatarImg: 'images/dax-2.jpg',
+      personaClass: 'gentle', personaLabel: '清纯学姐',
       why: '你最近搜过"显气质"，但你衣橱里全是廓形宽松款。叙白的雪纺贴身但不勒，刚好补缺口。',
-      msg: '<p>试试温柔感。叶纹雪纺罩衫光是站着就有故事。</p><p>面料一定要选真丝混纺，不然出门 2 小时就软塌了——这件我亲自盯过 3 版打样。</p>',
+      msg: '<p>看到你最近搜了"显气质"对不对～</p><p>试试温柔感叶纹雪纺罩衫，光是站着就有故事感。提醒你哦，面料要选真丝混纺，不然出门 2 小时就软塌了——这件学姐亲自盯过 3 版打样的，放心入。</p>',
+      ctaHint: '想问搭配？想看更多温柔款？跟学姐聊聊',
       products: [
         { name: '黄色叶纹雪纺罩衫', price: 329, img: 'images/dax-2.jpg' },
         { name: '樱花蕾丝立领新中式', price: 289, img: 'images/dax-1.jpg' }
       ]},
     { name: '三克拉', score: 78, rank: '价格补全', rankClass: 'budget', tags: '日系·学院 · 准确率 85%',
       cover: 'images/unvesno-1.jpg', avatarImg: 'images/unvesno-1.jpg',
+      personaClass: 'junior', personaLabel: '甜酷学妹',
       why: '你近 3 个月平均客单 ¥420，我整套控制在 ¥600 内，没有为单品溢价。',
-      msg: '<p>不需要花太多。复古 Polo 配灰色百褶半裙——是 5 年都不会过时的组合。</p><p>关键是 Polo 衫领子要有钩花细节，不然就是普通学生装。</p>',
+      msg: '<p>嘿姐姐！😊 学妹我观察你近 3 个月平均客单 ¥420，所以整套帮你控制在 ¥600 内啦，不让你心疼 💸</p><p>复古 Polo + 灰色百褶——5 年都不过时的搭配！记得选 Polo 领有钩花细节的那种，不然就是普通学生装啦～</p>',
+      ctaHint: '想看更多平价好搭？学妹给你扒同款～',
       products: [
         { name: '复古钩花领 Polo 针织', price: 198, img: 'images/unvesno-1.jpg' },
         { name: '灰色百褶半裙', price: 229, img: 'images/unvesno-1.jpg' }
@@ -776,6 +1081,40 @@
     if (stackIdx[key] >= data.length - 1) stackIdx[key] = 0;
     else stackIdx[key]++;
     renderStack(key);
+  }
+
+
+  // AI 思考过程：分步揭示
+  let thinkTarget = 's3a';
+  let thinkTimers = [];
+  function goThinking(target) {
+    thinkTarget = target;
+    // 切问题文本
+    const qMap = { 's3a': '"520 约会穿什么"', 's3b': '"给我推荐甜酷风衣服"' };
+    document.getElementById('thinkQ').textContent = qMap[target] || '';
+    goScreen('s2think');
+    // 重置步骤
+    thinkTimers.forEach(clearTimeout);
+    thinkTimers = [];
+    document.querySelectorAll('#thinkSteps .think-step').forEach(s => {
+      s.classList.remove('show', 'done', 'processing');
+    });
+    document.getElementById('thinkCta').classList.remove('show');
+    // 分步展示
+    const steps = document.querySelectorAll('#thinkSteps .think-step');
+    steps.forEach((step, i) => {
+      thinkTimers.push(setTimeout(() => {
+        step.classList.add('show', 'processing');
+        if (i > 0) steps[i-1].classList.remove('processing');
+        if (i > 0) steps[i-1].classList.add('done');
+      }, i * 700 + 300));
+    });
+    // 最后一步完成 + 显示 CTA
+    thinkTimers.push(setTimeout(() => {
+      steps[steps.length-1].classList.remove('processing');
+      steps[steps.length-1].classList.add('done');
+      document.getElementById('thinkCta').classList.add('show');
+    }, steps.length * 700 + 500));
   }
 
   function goScreen(id) {
