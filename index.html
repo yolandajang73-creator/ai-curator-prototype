@@ -514,6 +514,39 @@
   .persona-body p:last-child { margin-bottom: 0; }
   .persona-body .hl { color: #c2410c; font-weight: 700; }
 
+
+
+  /* ============ 顶部 agent-badge 三行结构（整合匹配信息） ============ */
+  .agent-badge {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .ab-row1 { display: flex; align-items: center; gap: 10px; width: 100%; }
+  .ab-name-block { flex: 1; min-width: 0; }
+  .ab-name {
+    font-size: 14px; font-weight: 700; line-height: 1.2;
+    margin-bottom: 5px;
+  }
+  .ab-tags {
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .ab-pill {
+    font-size: 9.5px; padding: 2px 7px; border-radius: 100px; line-height: 1.4;
+    font-weight: 500; white-space: nowrap;
+  }
+  .ab-pill.style { background: #f3f4f6; color: #4b5563; }
+  .ab-pill.match { background: #dcfce7; color: #15803d; font-weight: 700; }
+  .ab-pill.reason { background: #ede9fe; color: #6366f1; }
+  .ab-credentials {
+    font-size: 10px; color: #6b7280;
+    padding-top: 7px;
+    border-top: 1px dashed #e5e7eb;
+    width: 100%;
+    line-height: 1.5;
+  }
+
 </style>
 </head>
 <body>
@@ -1030,6 +1063,7 @@
 <script>
   const stackA = [
     { name: '赵大喜', score: 96, rank: '最匹配', rankClass: 'match', tags: '甜酷·Y2K · 准确率 94%',
+      tagsBrief: '甜酷·Y2K',
       cover: 'images/sweet-4.jpg', avatarImg: 'images/sweet-4.jpg',
       personaClass: 'bestie', personaLabel: '闺蜜悄悄话',
       matchReason: '「甜酷」87% × 收藏过 3 件刺绣Tee',
@@ -1042,6 +1076,7 @@
         { name: '卡通女孩印花Raglan', price: 218, img: 'images/sweet-1.jpg' }
       ]},
     { name: 'UNVESNO', score: 89, rank: '风格挑战', rankClass: 'complement', tags: '法式·极简 · 准确率 91%',
+      tagsBrief: '法式·极简',
       cover: 'images/unvesno-3.jpg', avatarImg: 'images/unvesno-3.jpg',
       personaClass: 'minimal', personaLabel: '直给型',
       matchReason: '反向推荐 · 骨架直线条 + 你少一件正式连衣裙',
@@ -1054,6 +1089,7 @@
         { name: '米白蕾丝慵懒吊带', price: 489, img: 'images/unvesno-4.jpg' }
       ]},
     { name: '法式碎花', score: 85, rank: '风格挑战', rankClass: 'complement', tags: '法式·真丝 · 准确率 89%',
+      tagsBrief: '法式·真丝',
       cover: 'images/dax-3.jpg', avatarImg: 'images/dax-3.jpg',
       personaClass: 'elder-sis', personaLabel: '熟女姐姐',
       matchReason: '你衣橱缺撑场连衣裙 + 预算上调 18%',
@@ -1065,6 +1101,7 @@
         { name: '油画印花深色吊带长裙', price: 1080, img: 'images/dax-4.jpg' }
       ]},
     { name: '叙白', score: 82, rank: '价格友好', rankClass: 'budget', tags: '甜美·新中式 · 准确率 87%',
+      tagsBrief: '甜美·新中式',
       cover: 'images/dax-2.jpg', avatarImg: 'images/dax-2.jpg',
       personaClass: 'gentle', personaLabel: '清纯学姐',
       matchReason: '搜过"显气质" + 衣橱全廓形宽松款',
@@ -1076,6 +1113,7 @@
         { name: '樱花蕾丝立领新中式', price: 289, img: 'images/dax-1.jpg' }
       ]},
     { name: '三克拉', score: 78, rank: '价格补全', rankClass: 'budget', tags: '日系·学院 · 准确率 85%',
+      tagsBrief: '日系·学院',
       cover: 'images/unvesno-1.jpg', avatarImg: 'images/unvesno-1.jpg',
       personaClass: 'junior', personaLabel: '甜酷学妹',
       matchReason: '近 3 月平均客单 ¥420 · 整套控价 ¥600 内',
@@ -1091,6 +1129,7 @@
   const stackB = [
     stackA[0],
     { name: 'CHICJOC', score: 92, rank: '最匹配', rankClass: 'match', tags: '甜辣·复古 · 准确率 90%',
+      tagsBrief: '甜辣·复古',
       cover: 'images/sweet-3.jpg', avatarImg: 'images/sweet-3.jpg',
       personaClass: 'bestie', personaLabel: '闺蜜悄悄话',
       matchReason: '「甜辣」画像 87% 重合 CHICJOC 客群',
@@ -1102,6 +1141,7 @@
         { name: '卡通女孩 Raglan', price: 218, img: 'images/sweet-1.jpg' }
       ]},
     { name: 'NeweJeans', score: 88, rank: '最匹配', rankClass: 'match', tags: '甜酷·防晒 · 准确率 88%',
+      tagsBrief: '甜酷·防晒',
       cover: 'images/sweet-2.jpg', avatarImg: 'images/sweet-2.jpg',
       personaClass: 'junior', personaLabel: '元气学妹',
       matchReason: '今年搜过 12 次"防晒" · 偏好功能性甜酷',
@@ -1134,21 +1174,21 @@
           <img class="bg" src="${a.cover}" />
           <span class="rank-tag ${a.rankClass}">${a.rank} · #${idx + 1}</span>
           <div class="agent-badge">
-            <div class="agent-avatar"><img src="${a.avatarImg}"/><div class="ai-corner" style="width:14px;height:14px;font-size:7px;border-width:1.5px;">AI</div></div>
-            <div class="agent-info">
-              <div class="name">${a.name}<span class="ai-badge sm">AI 主理人</span></div>
-              <div class="meta">${a.tags} · <span class="score">${a.score}% 匹配</span></div>
+            <div class="ab-row1">
+              <div class="agent-avatar"><img src="${a.avatarImg}"/><div class="ai-corner" style="width:14px;height:14px;font-size:7px;border-width:1.5px;">AI</div></div>
+              <div class="ab-name-block">
+                <div class="ab-name">${a.name}<span class="ai-badge sm">AI 主理人</span></div>
+                <div class="ab-tags">
+                  <span class="ab-pill style">${a.tagsBrief}</span>
+                  <span class="ab-pill match">${a.score}% 匹配</span>
+                  <span class="ab-pill reason">${a.matchReason}</span>
+                </div>
+              </div>
             </div>
+            <div class="ab-credentials">${a.credentials}</div>
           </div>
         </div>
         <div class="card-body">
-          <div class="match-info">
-            <div class="mi-row">
-              <span class="mi-key">✦ AI 匹配理由</span>
-              <span class="mi-val">${a.matchReason}</span>
-            </div>
-            <div class="mi-credentials">${a.credentials}</div>
-          </div>
           <div class="persona-msg">
             <div class="persona-head">
               <span class="persona-tag ${a.personaClass}">${a.personaLabel}</span>
